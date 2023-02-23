@@ -1,0 +1,63 @@
+function [mag,phase,freq] = bp(data,options)
+%BP is a custom bodeplotter
+vec = data.responsedata;
+mag = squeeze(abs(vec));
+phase = squeeze(angle(vec));
+freq = data.frequency; 
+
+
+% Only mag or both mag and phase
+if options.subplot == true % Then do mag and phase
+
+    % Scaling of plot
+    if strcmp(options.scale,'mag')
+        if strcmp(options.plot, 'scatter')
+            subplot(2,1,1)
+            scatter(freq,mag)
+            set(gca,'xscale','log')
+            subplot(2,1,2)
+            scatter(freq,phase)
+        else % Else make a standard bode plot
+            subplot(2,1,1)
+            semilogx(freq,mag)
+            subplot(2,1,2)
+            semilogx(freq,phase)
+        end
+    else % else do log and db
+        if strcmp(options.plot, 'scatter')
+            subplot(2,1,1)
+            scatter(freq,mag2db(mag))
+            set(gca,'xscale','log')
+            subplot(2,1,2)
+            scatter(freq,phase)
+        else % Else make a standard bode plot
+            subplot(2,1,1)
+            semilogx(freq,mag)
+            subplot(2,1,2)
+            semilogx(freq,phase)
+        end
+
+
+      
+    end
+    % Type of plot
+    figure()
+    
+        plot()
+    
+        if strcmp(options.scalex, 'scatter')
+            
+        end
+       
+    
+    else
+    end
+    end
+else % just plot mag
+
+end
+
+
+
+end
+
