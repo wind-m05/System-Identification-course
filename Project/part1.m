@@ -1,4 +1,4 @@
-% Project system identification Michiel Wind, Jelle Cruijsen
+% Project part 1 system identification Michiel Wind, Jelle Cruijsen
 clear all, close all, clc
 % Plot options
 options.subplot = true; % true,false
@@ -28,3 +28,4 @@ r = 1000*sin(x); % Iterate
 grad_u = gradient(u);
 sat_query = find(grad_u == 0);
 [Mmin,Mmax] = bounds(u(sat_query));
+

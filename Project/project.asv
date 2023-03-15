@@ -11,6 +11,7 @@ z = tf('z',1);
 F = (0.505+1.01*z^(-1)+0.505*z^(-2))/(1+0.7478*z^(-1)+0.2722*z^(-2));
 freq = (0:0.01:pi);
 freq_query = getGainCrossover(F,db2mag(-3)); % Crossover frequency at -3dB
+x = freq_query/pi
 
 figure()
 [mag,phase_var,freq,l1,l2,p1,p2] = bp(F,options,freq);
@@ -24,6 +25,75 @@ l1.LineWidth = 2; l2.LineWidth = 2;
 x = linspace(0,100);
 r = 1000*sin(x); % Iterate
 [u,y] = assignment_sys_20(r);
-query_sat = gradient(u);
-sat_points = find(query_sat == 0);
-M_sat = unique(u(sat_points))
+grad_u = gradient(u);
+sat_query = find(grad_u == 0);
+[Mmin,Mmax] = bounds(u(sat_query));
+
+%% Non-parametric identification
+
+% ETFE white noise test
+clear all, close all, clc
+options.subplot = true; % true,false
+options.xscale = 'lin'; % log,lin
+options.yscale = 'mag'; % mag,db
+options.plot = 'scatter'; %scatter,line
+N = 1024;
+a = -2.8;
+b = 2.8;
+r = (b-a).*rand(N,1) + a;
+[u,y] = assignment_sys_20(r);
+data = iddata(y,u,1);
+ir = cra(data,length(data.u)-1);
+M = 30;
+
+% Many trials
+figure()
+for i = 1:30
+r = (b-a).*rand(N,1) + a;
+[u,y] = assignment_sys_20(r);
+data = iddata(y,u,1);
+respetfe = etfe(data,M);
+% bp(respetfe,options,respetfe.frequency);
+bode(respetfe)
+hold on
+end
+
+%% Non-parametric identification 128 specific frequencies
+N = 1024;
+bandpass = 0.667*pi;
+amp = 1;
+% From time domain towards fourier
+% u = zeros(1,N);
+% k = 0:N-1;
+% test = sin((2*pi/N)*k);
+% 
+% for i = 1:N
+% u = u + sin((2*pi/N*i)*k)
+% end
+
+% From fourier doman towards time domain
+
+test = sin((2*pi/N)*k);
+testf = fft(test);
+% testf = fftshift(testf)
+stem(testf)
+kgrid = 0:N;
+fgrid = (0:2*pi/N:2*pi);
+u = zeros(1,N);
+k = 1:N;
+for i = 1:N+1
+    if mod(k(i),8) == 0
+    u(i) = amp;
+        if fgrid
+    else
+    u(i) = 0;
+    end
+end
+% u = fftshift(u);
+% r = ifft(u);
+% figure()
+% stem(u)
+% figure()
+% stem(r)
+% figure()
+% stem(fft(r))
