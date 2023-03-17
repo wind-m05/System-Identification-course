@@ -9,9 +9,9 @@ options.plot = 'line'; %scatter,line
 %% Determine frequency response butterworth filter
 z = tf('z',1);
 F = (0.505+1.01*z^(-1)+0.505*z^(-2))/(1+0.7478*z^(-1)+0.2722*z^(-2));
-freq = (0:0.01:pi);
+freq = (0:0.0001:pi);
 freq_query = getGainCrossover(F,db2mag(-3)); % Crossover frequency at -3dB
-x = freq_query/pi
+x = freq_query/pi;
 
 figure()
 [mag,phase_var,freq,l1,l2,p1,p2] = bp(F,options,freq);

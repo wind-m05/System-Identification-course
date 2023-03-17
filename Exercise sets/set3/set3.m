@@ -39,6 +39,10 @@ pzmap(G_ARX)
 num_poles = length(pole(G_ARX))
 num_zeros = length(zero(G_ARX))
 
+bode(G_0)
+hold on
+bode(G_ARX)
+
 %% FIR model
 clear all,  close all, clc
 N = 500; % Number of data points
@@ -55,6 +59,7 @@ hold on
 bode(G_FIR)
 legend('G0','FIR')
 %% 3th order ARX, OE
+rng(42)
 clear all,  close all, clc
 N = 500; % Number of data points
 B = [1 -.5 .2 .8 .1]; % Numerator coefficients of G 0
@@ -72,6 +77,9 @@ hold on
 bode(G_ARX3)
 bode(G_OE3)
 legend('G0','G arx','G OE')
+
+num_poles = length(pole(G_OE3))
+num_zeros = length(zero(G_OE3))
 %% Prefiltering for ARX fitting
 clear all,  close all, clc
 rng(41)
