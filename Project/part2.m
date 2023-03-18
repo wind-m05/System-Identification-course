@@ -43,7 +43,7 @@ range = [-3 3]; % Range in time domain
 band = [0 bandpass_freq]; % Frequency band
 sinnum = 128; % Number of sinusoids
 NumTrials = 10;
-GridSkip = 1;
+GridSkip = 2;
 SineData = [sinnum,NumTrials,GridSkip];
 [r,freq] = idinput([T 1 Tnum],'sine',band,range,SineData);
 figure
@@ -72,11 +72,51 @@ clear respetfe
 % Many trials
 trials = 1;
 figure(1)
+
+
+%% TF estimate vs ETFE vs SPA
+close all, clc
+T = 1024; % Period
+window = rectwin(T);
+Tnum = 1; % Number of periods
+range = [-3 3]; % Range in time domain
+band = [0 bandpass_freq]; % Frequency band
+sinnum = 128; % Number of sinusoids
+NumTrials = 10;
+GridSkip = 2;
+SineData = [sinnum,NumTrials,GridSkip];
+[r,freq] = idinput([T 1 Tnum],'sine',band,range,SineData);
+% freq = [1:128]/128*pi;
+[u,y] = assignment_sys_20(r);
+M = T; % No averaging
+data = iddata(y,u);
+respetfe = etfe(data);
+options.subplot = true; % true,false
+options.xscale = 'lin'; % log,lin
+options.yscale = 'mag'; % mag,db
+options.plot = 'line'; %scatter,line
+[resptfest,freq] = tfestimate(u,y,window,[],freq);
+respetfe = etfe(data,M);
+respspa = spa(data,T,freq);
+sys = frd(resptfest,freq);
+bode(sys,'b*')
+hold on
+bode(respetfe,'r*')
+bode(respspa,'y*')
+
+[pxx,f] = periodogram(u);
+f_grid = f(pxx >=0.001); % this is the same as freq, which implies the same frequencies in u are present as in r.
+% This also implies that the ETFE MUST be able to tell which frequencies it
+% is getting, so why does it not only display and estimate the frequencies
+% that I am actually supplying to the system?
+%% ETFE
 for i = 1:trials
 [u,y] = assignment_sys_20(r);
 data = iddata(y,u);
 respetfe{i} = etfe(data,M); % MUST SPECIFY WHICH freq !
-bode(respetfe{i},'r.')
+respetfe_tfestimate{i} = tfestmiate(u,y,ones(T,1),T,freq); % MUST SPECIFY WHICH freq !
+freqresp(respetfe{i},freq)
+% bode(respetfe{i},'r.')
 respetfe_summed = respetfe_summed+respetfe{i};
 hold on
     if i == trials
@@ -97,7 +137,6 @@ hold on
 response = response/trials;
 sys = frd(response,respetfe{1}.Frequency);
 bode(sys,'b*')
-%% Task 2.3 
 
 %% Calculate estimate of Phi_v via E
 respetfe_gem = respetfe{1}*0;
