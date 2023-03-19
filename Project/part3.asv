@@ -1,0 +1,60 @@
+% Project part 3 system identification Michiel Wind, Jelle Cruijsen
+clear all, close all, clc
+
+% Determine frequency response butterworth filter
+z = tf('z',1);
+F = (0.505+1.01*z^(-1)+0.505*z^(-2))/(1+0.7478*z^(-1)+0.2722*z^(-2));
+freq = (0:0.001:pi);
+freq_query = getGainCrossover(F,db2mag(-3)); % Crossover frequency at -3dB
+bandpass_freq = freq_query/pi;
+
+%% PRBS1 vs PRBS2 vs Gaussian noise
+N = 3000;
+p = 0.5;
+Range = [-3,3];
+Band = [0 0.4];
+[r_1,freq] = idinput(N,'prbs',Band,Range);
+% Problem is that the spectrum does not account for the fact that the
+% passband is at 0.667, so there is no extra power pushed into the lower
+% frequencies.
+r_2 = prbs(3000,3,0.8);
+% Range = [-1,1];
+r_3 = idinput(N,'rgs',Band,Range);
+stem(abs(fftshift(fft(r_1))))
+hold on
+stem(abs(fftshift(fft(r_2))))
+stem(abs(fftshift(fft(r_3))))
+legend('r1','r2','r3')
+
+[u_1,y_1] = assignment_sys_20(r_1);
+[u_2,y_2] = assignment_sys_20(r_2);
+[u_3,y_3] = assignment_sys_20(r_3);
+% Filtered gaussian noise
+[phi_u_1,freq1] = pwelch(u_1)
+[phi_u_2,freq2] = pwelch(u_2)
+[phi_u_3,freq3] = pwelch(u_3)
+sys_u1 = frd(phi_u_1,freq1)
+sys_u2 = frd(phi_u_2,freq2)
+sys_u3 = frd(phi_u_3,freq3)
+figure
+bode(sys_u1)
+hold on
+bode(sys_u2)
+bode(sys_u3)
+legend('u_1','u_2','u_3')
+
+% Trapizoidal integration
+u1_int = cumsum(phi_u_1);
+u2_int = cumsum(phi_u_2);
+u3_int = cumsum(phi_u_3);
+figure
+plot(u1_int)
+hold on
+plot(u2_int)
+plot(u3_int)
+legend('u_1','u_2','u_3')
+
+% Calculate power loss
+[phi_r_1,freq1] = pwelch(u_1)
+[phi_r_2,freq2] = pwelch(u_2)
+[phi_r_3,freq3] = pwelch(u_3)

@@ -13,7 +13,7 @@ freq = (0:0.001:pi);
 freq_query = getGainCrossover(F,db2mag(-3)); % Crossover frequency at -3dB
 bandpass_freq = freq_query/pi;
 
-%% ETFE white noise test
+%% ETFE white noise test (Initial trial)
 N = 1024;
 trials = 10;
 a = -2.8;
@@ -36,7 +36,7 @@ bode(respetfe)
 hold on
 end
 
-%% Non-parametric identification 128 specific frequencies
+%% Reference definition
 T = 1024; % Period
 Tnum = 1; % Number of periods
 range = [-3 3]; % Range in time domain
@@ -46,36 +46,23 @@ NumTrials = 10;
 GridSkip = 2;
 SineData = [sinnum,NumTrials,GridSkip];
 [r,freq] = idinput([T 1 Tnum],'sine',band,range,SineData);
-figure
-stem(r)
 fourier_grid = 2*pi/T*(1:GridSkip:fix(T/2));
 fourier_grid_norm = fourier_grid/pi;
 fourier_grid_red = fourier_grid_norm(fourier_grid_norm <= bandpass_freq);
 
-rfft = fft(r);
-figure
-stem(abs(rfft))
-%%
-uabs = abs(rfft);
-uabsn = uabs/max(uabs);
-numsinu = sum(uabsn)/2;
 [u,y] = assignment_sys_20(r);
 data = iddata(y,u);
 % ir = cra(data,length(data.u)-1);
 M = T; % No averaging
-
+% Just one trial to get the datastructure of the summed etfe right
 [u,y] = assignment_sys_20(r);
 data = iddata(y,u);
 respetfe = etfe(data);
 respetfe_summed = respetfe*0;
 clear respetfe
-% Many trials
-trials = 1;
-figure(1)
 
 
-%% TF estimate vs ETFE vs SPA
-close all, clc
+%% TF estimate vs ETFE vs SPA test
 T = 1024; % Period
 window = rectwin(T);
 Tnum = 1; % Number of periods
@@ -109,35 +96,52 @@ f_grid = f(pxx >=0.001); % this is the same as freq, which implies the same freq
 % This also implies that the ETFE MUST be able to tell which frequencies it
 % is getting, so why does it not only display and estimate the frequencies
 % that I am actually supplying to the system?
-%% ETFE
+%% ETFE only
+trials = 10;
 for i = 1:trials
 [u,y] = assignment_sys_20(r);
 data = iddata(y,u);
-respetfe{i} = etfe(data,M); % MUST SPECIFY WHICH freq !
-respetfe_tfestimate{i} = tfestmiate(u,y,ones(T,1),T,freq); % MUST SPECIFY WHICH freq !
-freqresp(respetfe{i},freq)
-% bode(respetfe{i},'r.')
+respetfe{i} = etfe(data,M);
+freqresp(respetfe{i},freq);
+bode(respetfe{i},'r.');
 respetfe_summed = respetfe_summed+respetfe{i};
 hold on
-    if i == trials
-        hold on
-        respetfe_expected = respetfe_summed/trials;
-        bode(respetfe_expected,'b*')
-    end
+%     if i == trials
+%         hold on
+%         respetfe_expected = respetfe_summed/trials;
+%         bode(respetfe_expected,'b*')
+%     end
 end
-%% Just some test, appears to be unnecessesary
-response = zeros(1,length(respetfe{1}.Frequency));
-for i = 1:length(respetfe{1}.Frequency)
-    for k = 1:length(respetfe)
-        response(i) = response(i) + squeeze(respetfe{k}.ResponseData(i));  
-    end
-end
-figure(1)
-hold on
-response = response/trials;
-sys = frd(response,respetfe{1}.Frequency);
-bode(sys,'b*')
+grid on
+%% Test to see if you can sum up the data structure idfrd
+% response = zeros(1,length(respetfe{1}.Frequency));
+% for i = 1:length(respetfe{1}.Frequency)
+%     for k = 1:length(respetfe)
+%         response(i) = response(i) + squeeze(respetfe{k}.ResponseData(i));  
+%     end
+% end
+% figure(1)
+% hold on
+% response = response/trials;
+% sys = frd(response,respetfe{1}.Frequency);
+% bode(sys,'b*')
 
+%% TFestimate only
+trials = 10;
+T = 1024; % Period
+window = rectwin(T);
+for i = 1:trials
+[u,y] = assignment_sys_20(r);
+[resptfest{i},freq] = tfestimate(u,y,window,0,freq);
+sys{i} = frd(resptfest{i},freq);
+bode(sys{i},'b.')
+hold on
+%     if i == trials
+%         hold on
+%         respetfe_expected = respetfe_summed/trials;
+%         bode(respetfe_expected,'b*')
+%     end
+end
 %% Calculate estimate of Phi_v via E
 respetfe_gem = respetfe{1}*0;
 for i = 1:trials
@@ -155,18 +159,27 @@ Phi_v_est = sum(abs(fft(u)).^2)/length(u) * respetfe_var;
 bp(Phi_v_est,options)
 
 %% Calculate estimate of Phi_v via spectral densities
-% ufft = fft(u);
-% yfft = fft(y);
-% phi_u = (abs(ufft).^2)/length(ufft);
-% phi_y = (abs(yfft).^2)/length(yfft);
-phi_u = pwelch(u);
-phi_y = pwelch(y);
-phi_uy = cpsd(y,u);
+% Tried functions: xcorr, periodogram, pwelch, cpsd
+% freq = [0:0.01:pi]
+close all
+N = length(u);
+nfft = N/4;
+window_ = hamming(nfft);
+phi_u = pwelch(u,window_,nfft/2,freq);
+phi_y = pwelch(y,window_,nfft/2,freq);
+[phi_uy,freqcpsd] = cpsd(y,u,window_,nfft/2,freq);
+% phi_uy = sqrt(phi_y.*conj(phi_u));
 phi_v_est_spect = phi_y - (abs(phi_uy).^2)./(phi_u);
 figure
 stem(phi_v_est_spect)
+% Now towards bode plot
+semilogx(freqcpsd,mag2db(phi_v_est_spect),'b.','MarkerSize',10) 
+grid on
+xlabel('Frequency [rad/s]')
+ylabel('Magnitude [dB]')
 
-%% r = 0 
+
+%% r = 0 (not allowed I think)
 close all
 N=1024;
 r = zeros(1,N);
@@ -183,3 +196,36 @@ nfft = N/64;
 periodogram(y,window,nfft)
 figure
 stem(abs(fft(y)))
+
+%% Plot fourier grid
+figure
+plot(freq,'LineWidth',2)
+xlabel('Index')
+ylabel('Frequency [rad/s]')
+grid on
+
+%% Plot input signal r(t) u(t) and fourier transform
+figure
+subplot(211)
+stem(r)
+xlabel('Index')
+ylabel('r(t) amplitude [-]')
+grid on
+subplot(212)
+stem(abs(fftshift(fft(r))))
+xlabel('Index')
+ylabel('R(\omega) amplitude [-]')
+grid on
+
+%% Plot input signal u(t) and fourier transform
+figure
+subplot(211)
+stem(u)
+xlabel('Index')
+ylabel('r(t) amplitude [-]')
+grid on
+subplot(212)
+stem(abs(fftshift(fft(u))))
+xlabel('Index')
+ylabel('R(\omega) amplitude [-]')
+grid on
