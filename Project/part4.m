@@ -25,10 +25,10 @@ ylabel('Amplitude [-]')
 close all
 [u,y] = assignment_sys_20(r);
 data = iddata(y,u);
-na = 4;
-nb = 4;
-nk = 3;
-
+na = 5;
+nb = 5;
+nk = 1;
+% Most likely a 5th order OE model...
 sys1 = arx(data,[na nb nk],arxOptions('Focus','prediction'));
 sys2 = oe(data,[na nb nk],arxOptions('Focus','prediction'));
 figure
@@ -41,4 +41,40 @@ hold on
 bode(sys2)
 legend('ARX','OE')
 
+% Which model order to take:
+% V = arxstruc(ze,zv,NN) !!
+% Validation
+%- check with respect to ETFE, but be careful since ETFE can also be wrong
+%- Check pole zero map for maybe pole zero cancelations which will imply a
+%too high model order.
+%-residual test data
 
+%% Step response of the system
+close all
+N = 3000;
+r = zeros(N,1);
+trials = 10000;
+% z = zeros(N/2,1);
+% o = ones(N/2,1);
+r(1:N/2,1) = 0;
+r(N/2:end,1) = 1;
+y_sum = zeros(N,1);
+for i = 1:trials
+[u,y] = assignment_sys_20(r);
+y_sum = y_sum + y;
+end
+y_avg = y_sum/trials;
+figure
+stem(y_avg)
+% So the delay is nk = 1;
+%% Box jenkins
+
+nb = 5;
+nc = 5;
+nd = 7;
+nf = 7;
+nk = 1;
+
+BJ = bj(data,[nb nc nd nf nk]);
+figure
+resid([y u],BJ)
