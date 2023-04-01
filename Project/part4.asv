@@ -9,7 +9,7 @@ freq_query = getGainCrossover(F,db2mag(-3)); % Crossover frequency at -3dB
 bandpass_freq = freq_query/pi;
 % 
 N = 3000;
-p = 0.6; % probability of switching in prbs.
+p = 0.6;
 Range = [-3,3];
 Band = [0 bandpass_freq];
 index_min = fix(N/2 - N/2*bandpass_freq);
@@ -172,7 +172,7 @@ figure
 bode(M_oe{row,col})
 % Spa function for noise spectrum??
 
-%% matlab functions test (from the lecture notes and then matlab function in the chapter model validations)
+%% matlab functions test
 [u,y] = assignment_sys_20(r);
 z = iddata(y,u);
 [u,y] = assignment_sys_20(r);
@@ -191,7 +191,7 @@ for i = 1:length(V_mat)
 end
 [minvalue, minindex] = min(V_AIC(:));
 [row, col] = ind2sub(size(V_AIC), minindex);
-nn = [row col nk]; % This gives the right values... [5,5,1]
+nn = [row col nk] % This gives the right values... [5,5,1]
 
 %% Aikake's information criterion (AIC) for ARX models
 V_mat = cell2mat(V_arx_cross);
@@ -203,24 +203,22 @@ for i = 1:length(V_mat)
 end
 [minvalue, minindex] = min(V_AIC(:));
 [row, col] = ind2sub(size(V_AIC), minindex);
-nn = [row col nk];
+nn = [row col nk]
 
 %% Plot only the minimum of the scatter plot per order
 V_mat = cell2mat(V_oe_cross);
 figure()
-A = cell(nf+nb,1);
-A{1,1} = nan; % No possible permutation to get 1.
-for k = 2:nf+nb % Number of parameters
-    for i = 1:nf
-        for j = 1:nb
-            if i+j == k
-            A{k} = [A{k},V_mat(i,j)]; 
-        %         scatter(i+j,V_oe_cross{i,j})
-        %         hold on
-            end
+A = cell(length(V_mat)+1,1);
+A{1,1} = 0; % No possible permutation to get 1.
+for i = 1:nf
+    for j = 1:nb
+        if i+j == i+1
+        A{i+1} = [A{i+1},V_mat(i,j)]; 
+%         scatter(i+j,V_oe_cross{i,j})
+%         hold on
         end
     end
-    A{k} = min(A{k});
 end
 A = cell2mat(A);
-scatter(1:length(A),A,'*')
+% xlim([0 i+j])
+% ylim([min(min(cell2mat(V_oe_cross))) min(min(cell2mat(V_oe_cross)))+2])
