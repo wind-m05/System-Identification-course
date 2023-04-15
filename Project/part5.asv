@@ -37,9 +37,7 @@ Band = [0 bandpass_freq];
 % end
 
 %% Theoretical covariance (We choose model_runs{3}, because its most likely a global minimizer)
-% load('OE_montecarlo_original')
-model_runs{3}.B = [model_runs{3}.B];
-model_runs{3}.F = [model_runs{3}.F];
+load('OE_montecarlo_original')
 Prho = getcov(model_runs{3});
 imagesc(Prho);
 colorbar;
