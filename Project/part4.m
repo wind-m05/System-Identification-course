@@ -32,8 +32,8 @@ sys1 = oe(data,[nb nf nk],oeOptions('Focus','prediction')); % OE
 figure
 resid([y u],sys1);
 %% parametric ID ARX
-na = 5;
-nb = 5;
+na = 20;
+nb = 20;
 nk = 1;
 sys2 = arx(data,[na nb nk],arxOptions('Focus','prediction')); 
 figure

@@ -30,7 +30,7 @@ ylabel('Amplitude [-]')
 [u_1,y_1] = assignment_sys_20(r_1);
 [u_2,y_2] = assignment_sys_20(r_2);
 [u_3,y_3] = assignment_sys_20(r_3);
-% Filtered gaussian noise
+
 [phi_u_1,freq1] = pwelch(u_1);
 [phi_u_2,freq2] = pwelch(u_2);
 [phi_u_3,freq3] = pwelch(u_3);
