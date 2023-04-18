@@ -98,6 +98,7 @@ f_grid = f(pxx >=0.001); % this is the same as freq, which implies the same freq
 % that I am actually supplying to the system?
 %% ETFE only
 trials = 10;
+respetfe=[];
 for i = 1:trials
 [u,y] = assignment_sys_20(r);
 data = iddata(y,u);
@@ -129,7 +130,9 @@ grid on
 %% TFestimate only
 trials = 10;
 T = 1024; % Period
+resptfest = cell(trials,1);
 window = rectwin(T);
+sys = [];
 for i = 1:trials
 [u,y] = assignment_sys_20(r);
 [resptfest{i},freq] = tfestimate(u,y,window,0,freq);
