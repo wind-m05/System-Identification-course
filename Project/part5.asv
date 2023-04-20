@@ -101,7 +101,6 @@ var_B_init = var(aux_B_init);
 
 % Compare the Monte Carlo variance with the theoretical variance
 var_vec_init = [var_B_init(2:end) var_F_init(2:end)];
-mean_vec_init = [mean_B_init(2:end) mean_F_init(2:end)];
 theoretical_var = diag(Prho)';
 bar_aux_init = [];
 for i = 1:length(var_vec_init)
