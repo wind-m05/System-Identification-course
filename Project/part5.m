@@ -51,8 +51,8 @@ save('median_F','median_F')
 Prho = getcov(model_runs{model_runs_middle},'value');
 imagesc(Prho);
 colorbar;
-xlabel('Parameters [b0,b1,b2,b3,b4,f1,f2,f3,f4,f5]',FontSize=font,Interpreter='latex');
-ylabel('Parameters [b0,b1,b2,b3,b4,f1,f2,f3,f4,f5]',FontSize=font,Interpreter='latex');
+xlabel('Parameters $[b_0,b_1,b_2,b_3,b_4,f_1,f_2,f_3,f_4,f_5]$',FontSize=font,Interpreter='latex');
+ylabel('Parameters $[b_0,b_1,b_2,b_3,b_4,f_1,f_2,f_3,f_4,f_5]$',FontSize=font,Interpreter='latex');
 
 %% Comparison 
 mean_vec = [mean_B(2:end) mean_F(2:end)];
@@ -64,9 +64,9 @@ for i = 1:length(var_vec)
 end
 figure
 bar(bar_aux)
-legend('$\sigma_{mc}\;$ Monte Carlo variance','$\sigma_{th}\;$ Theoretical variance',FontSize=font,Interpreter='latex')
-xlabel('Parameters [b0,b1,b2,b3,b4,f1,f2,f3,f4,f5]',FontSize=font,Interpreter='latex')
-ylabel('$\sigma_{mc}$,$\;$ $3000*\sigma_{th}$',FontSize=font+4,Interpreter='latex')
+legend('$\sigma_{mc}^2\;$ Monte Carlo variance','$\sigma_{th}^2\;$ Theoretical variance',FontSize=font,Interpreter='latex')
+xlabel('Parameters $[b_0,b_1,b_2,b_3,b_4,f_1,f_2,f_3,f_4,f_5]$',FontSize=font,Interpreter='latex')
+ylabel('$\sigma_{mc}^2$,$\;$ $3000*\sigma_{th}^2$',FontSize=font+4,Interpreter='latex')
 grid on
 cmp1_var = [[var_B(2:end) var_F(2:end)];theoretical_var];
 %% Monte Carlo with initialization of the points
@@ -109,9 +109,9 @@ for i = 1:length(var_vec_init)
 end
 figure
 bar(bar_aux_init)
-legend('$\sigma_{mc}\;$ Monte Carlo variance','$\sigma_{th}\;$ Theoretical variance',FontSize=font,Interpreter='latex')
-xlabel('Parameters [b0,b1,b2,b3,b4,f1,f2,f3,f4,f5]',FontSize=font,Interpreter='latex')
-ylabel('$\sigma_{mc}$,$\;$ $\sigma_{th}$',FontSize=font+4,Interpreter='latex')
+legend('$\sigma_{mc}^2\;$ Monte Carlo variance','$\sigma_{th}^2\;$ Theoretical variance',FontSize=font,Interpreter='latex')
+xlabel('Parameters $[b_0,b_1,b_2,b_3,b_4,f_1,f_2,f_3,f_4,f_5]$',FontSize=font,Interpreter='latex')
+ylabel('$\sigma_{mc}^2$,$\;$ $\sigma_{th}^2$',FontSize=font+4,Interpreter='latex')
 grid on
 cmp2 = [[var_B_init(2:end) var_F_init(2:end)];theoretical_var];
 save('OE_var','theoretical_var');

@@ -40,12 +40,10 @@ for i = 1:length(BJ_var_G)
 end
 figure
 bar(bar_aux_init)
-legend('$\sigma_{OE}\;$ Output error variance','$\sigma_{BJ}\;$ Box Jenkins variance',FontSize=font,Interpreter='latex')
-xlabel('Parameters [b0,b1,b2,b3,b4,f1,f2,f3,f4,f5]',FontSize=font,Interpreter='latex')
-ylabel('$\sigma_{OE}$,$\;$ $\sigma_{BJ}$',FontSize=font+4,Interpreter='latex')
+legend('$\sigma_{OE}^2\;$ Output error variance','$\sigma_{BJ}^2\;$ Box Jenkins variance',FontSize=font,Interpreter='latex')
+xlabel('Parameters $[b_0,b_1,b_2,b_3,b_4,f_1,f_2,f_3,f_4,f_5]$',FontSize=font,Interpreter='latex')
+ylabel('$\sigma_{OE}^2$,$\;$ $\sigma_{BJ}^2$',FontSize=font+4,Interpreter='latex')
 grid on
-legend('Output error variance','Box Jenkins variance')
+% legend('Output error variance','Box Jenkins variance')
 
 %% Bode plot first 20 iniitlization mc runs
-
-for i
